@@ -36,7 +36,9 @@ def process_card(card):
 
 
 def process_list(list_, cards):
-    concatenated_cards = '\n\n'.join(process_card(c) for c in cards)
+    concatenated_cards = '\n\n'.join(process_card(c)
+                                     for c in cards
+                                     if not c['name'].startswith('.'))
     return '## {0}\n\n{1}'.format(list_['name'], concatenated_cards)
 
 
@@ -44,7 +46,8 @@ def process_board(board_data):
     separated_cards = toolz.partitionby(operator.itemgetter('idList'),
                                         board_data['cards'])
     markdowned = '\n\n'.join(process_list(l, c)
-                             for l, c in zip(board_data['lists'], separated_cards))
+                             for l, c in zip(board_data['lists'], separated_cards)
+                             if not l['name'].startswith('.'))
     return '# {0}\n\n{1}'.format(board_data['name'], markdowned)
 
 
@@ -52,7 +55,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Trello Scribe')
     parser.add_argument('-b', action='store', dest='board',
                         help='Trello board to fetch (id or shortlink -- for board name, use -s)')
-    parser.add_argument('-s', action='store', dest='search', help='Search Trello boards for a baord name')
+    parser.add_argument('-s', action='store', dest='search',
+                        help='Search Trello boards for a board name')
     parser.add_argument('--trello-key', action='store',
                         default=os.getenv('trello_key'), help='Trello API Key')
     parser.add_argument('--trello-token', action='store',
