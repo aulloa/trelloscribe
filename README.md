@@ -1,4 +1,4 @@
-# Trello Scribe
+# TrelloScribe
 
 ## What
 
