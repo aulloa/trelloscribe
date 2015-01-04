@@ -1,3 +1,4 @@
+import json
 from string import Formatter
 
 import requests
@@ -40,6 +41,15 @@ def execute_request(key, token, method, path, *args, **kwargs):
     req.raise_for_status()
     return req.json()
 
+
+def read_board(fn):
+    with open(fn, 'r') as f:
+        board_data = json.load(f)
+        board_data['cards'] = [c for c in board_data['cards']
+                               if not c['closed']]
+        board_data['lists'] = [l for l in board_data['lists']
+                               if not l['closed']]
+    return board_data
 
 def extract_used_fields(text):
     fmtr = Formatter()

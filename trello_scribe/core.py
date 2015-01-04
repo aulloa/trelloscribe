@@ -5,7 +5,7 @@ import os
 
 import toolz
 
-from .trelloapi import download_board, find_board
+from .trelloapi import download_board, find_board, read_board
 
 
 def process_card(card):
@@ -53,11 +53,6 @@ def main():
     elif args.search:
         board_data = find_board(args.trello_key, args.trello_token, args.search)
     elif args.read:
-        with open(args.read, 'r') as f:
-            board_data = json.load(f)
-            board_data['cards'] = [c for c in board_data['cards']
-                                   if not c['closed']]
-            board_data['lists'] = [l for l in board_data['lists']
-                                   if not l['closed']]
+        board_data = read_board(args.read)
 
     toolz.pipe(board_data, process_board, print)
