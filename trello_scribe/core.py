@@ -1,4 +1,5 @@
 import argparse
+import json
 import operator
 import os
 
@@ -57,6 +58,8 @@ def parse_args():
                         help='Trello board to fetch (id or shortlink -- for board name, use -s)')
     parser.add_argument('-s', action='store', dest='search',
                         help='Search Trello boards for a board name')
+    parser.add_argument('-r', action='store', dest='read',
+                        help='Read a Trello export from file (JSON)')
     parser.add_argument('--trello-key', action='store',
                         default=os.getenv('trello_key'), help='Trello API Key')
     parser.add_argument('--trello-token', action='store',
@@ -70,4 +73,12 @@ def main():
     elif args.search:
         board_id = search_boards(args.trello_key, args.trello_token, args.search)
         board_data = download_board(args.trello_key, args.trello_token, board_id)
+    elif args.read:
+        with open(args.read, 'r') as f:
+            board_data = json.load(f)
+            board_data['cards'] = [c for c in board_data['cards']
+                                   if not c['closed']]
+            board_data['lists'] = [l for l in board_data['lists']
+                                   if not l['closed']]
+
     toolz.pipe(board_data, process_board, print)
