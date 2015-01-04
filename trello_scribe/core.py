@@ -12,6 +12,20 @@ def download_board(trello_key, trello_token, board):
     return trello._request('get', 'boards/{board}', board=board, cards='open',
                            lists='open')
 
+def search_boards(trello_key, trello_token, board_name):
+    trello = TrelloAPI(trello_key, trello_token)
+    all_boards = trello._request('get', 'members/me/boards', filter='open',
+                           fields='name')
+    try:
+        return toolz.thread_last(
+            all_boards,
+            (filter, lambda x: x['name'] == board_name),
+            toolz.first,
+            (toolz.get, 'id')
+        )
+    except:
+        return None
+
 
 def process_card(card):
     if card['desc']:
@@ -36,8 +50,9 @@ def process_board(board_data):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Trello Scribe')
-    parser.add_argument('board', action='store',
-                        help='Trello board to fetch (id or shortlink)')
+    parser.add_argument('-b', action='store', dest='board',
+                        help='Trello board to fetch (id or shortlink -- for board name, use -s)')
+    parser.add_argument('-s', action='store', dest='search', help='Search Trello boards for a baord name')
     parser.add_argument('--trello-key', action='store',
                         default=os.getenv('trello_key'), help='Trello API Key')
     parser.add_argument('--trello-token', action='store',
@@ -46,5 +61,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    board_data = download_board(args.trello_key, args.trello_token, args.board)
+    if args.board:
+        board_data = download_board(args.trello_key, args.trello_token, args.board)
+    elif args.search:
+        board_id = search_boards(args.trello_key, args.trello_token, args.search)
+        board_data = download_board(args.trello_key, args.trello_token, board_id)
     toolz.pipe(board_data, process_board, print)
