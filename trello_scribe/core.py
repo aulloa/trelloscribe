@@ -5,27 +5,7 @@ import os
 
 import toolz
 
-from .trelloapi import TrelloAPI
-
-
-def download_board(trello_key, trello_token, board):
-    trello = TrelloAPI(trello_key, trello_token)
-    return trello._request('get', 'boards/{board}', board=board, cards='open',
-                           lists='open')
-
-def search_boards(trello_key, trello_token, board_name):
-    trello = TrelloAPI(trello_key, trello_token)
-    all_boards = trello._request('get', 'members/me/boards', filter='open',
-                           fields='name')
-    try:
-        return toolz.thread_last(
-            all_boards,
-            (filter, lambda x: x['name'] == board_name),
-            toolz.first,
-            (toolz.get, 'id')
-        )
-    except:
-        return None
+from .trelloapi import download_board, find_board
 
 
 def process_card(card):
@@ -71,8 +51,7 @@ def main():
     if args.board:
         board_data = download_board(args.trello_key, args.trello_token, args.board)
     elif args.search:
-        board_id = search_boards(args.trello_key, args.trello_token, args.search)
-        board_data = download_board(args.trello_key, args.trello_token, board_id)
+        board_data = find_board(args.trello_key, args.trello_token, args.search)
     elif args.read:
         with open(args.read, 'r') as f:
             board_data = json.load(f)
