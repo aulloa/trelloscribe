@@ -5,30 +5,7 @@ import os
 import toolz
 
 from .trelloapi import download_board, find_board, read_board
-
-
-def process_card(card):
-    if card['desc']:
-        fstring = '### {0}\n\n{1}'
-    else:
-        fstring = '### {0}{1}'
-    return fstring.format(card['name'], card['desc'].strip())
-
-
-def process_list(list_, cards):
-    concatenated_cards = '\n\n'.join(process_card(c)
-                                     for c in cards
-                                     if not c['name'].startswith('.'))
-    return '## {0}\n\n{1}'.format(list_['name'], concatenated_cards)
-
-
-def process_board(board_data):
-    separated_cards = toolz.partitionby(operator.itemgetter('idList'),
-                                        board_data['cards'])
-    markdowned = '\n\n'.join(process_list(l, c)
-                             for l, c in zip(board_data['lists'], separated_cards)
-                             if not l['name'].startswith('.'))
-    return '# {0}\n\n{1}'.format(board_data['name'], markdowned)
+from .convert import trello_to_ast, ast_to_md
 
 
 def parse_args():
@@ -54,4 +31,4 @@ def main():
     elif args.read:
         board_data = read_board(args.read)
 
-    toolz.pipe(board_data, process_board, print)
+    toolz.pipe(board_data, trello_to_ast, ast_to_md, print)
