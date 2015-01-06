@@ -1,5 +1,8 @@
-import toolz
 import operator
+
+import pypandoc
+import toolz
+
 
 def trello_to_ast(board):
     new_board = {
@@ -21,9 +24,13 @@ def trello_to_ast(board):
 def astcard_to_md(card):
     if card['desc']:
         fstring = '### {0}\n\n{1}'
+        contents = pypandoc.convert(card['desc'], 'markdown', format='markdown',
+                                    extra_args=['--atx-headers',
+                                                '--base-header-level=4'])
     else:
         fstring = '### {0}{1}'
-    return fstring.format(card['name'], card['desc'].strip())
+        contents = ''
+    return fstring.format(card['name'], contents.strip())
 
 def astlist_to_md(list_):
     concated_cards = '\n\n'.join(map(astcard_to_md, list_['cards']))
