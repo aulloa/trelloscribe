@@ -4,6 +4,7 @@ from string import Formatter
 import requests
 import toolz
 
+@toolz.curry
 def download_board(key, token, board, *args, **kwargs):
     """Downloads the board from Trello. Accepts idBoard or shortLink"""
     method = 'get'
@@ -11,7 +12,7 @@ def download_board(key, token, board, *args, **kwargs):
     return execute_request(key, token, method, path, board=board, cards='open',
                            lists='open')
 
-
+@toolz.curry
 def search_boards(key, token, board_name):
     method = 'get'
     path = 'members/me/boards'

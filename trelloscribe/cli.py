@@ -19,9 +19,9 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
 @click.argument('board')
 def cli(board_source, key, token, format, board):
     read_phase = {
-        'id': [partial(download_board, key, token), trello_to_ast],
-        'name': [partial(search_boards, key, token), 
-                 partial(download_board, key, token),  trello_to_ast],
+        'id': [download_board(key, token), trello_to_ast],
+        'name': [search_boards(key, token), download_board(key, token),
+                 trello_to_ast],
         'file': [read_board,  trello_to_ast]
     }
     convert_phase = {
