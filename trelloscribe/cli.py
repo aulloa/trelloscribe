@@ -1,3 +1,4 @@
+from functools import partial
 import json
 
 import click
@@ -16,21 +17,22 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
               default='md')
 @click.argument('board')
 def cli(board_source, key, token, format, board):
+    pipeline = []
     if board_source == 'id':
-        board_data = download_board(key, token, board)
+        pipeline.append(partial(download_board, key, token))
     elif board_source == 'name':
-        board_data = toolz.thread_last(board, (search_boards, key, token),
-                                       (download_board, key, token))
+        pipeline.extend([partial(search_boards, key, token),
+                        partial(download_board, key, token)])
     elif board_source == 'file':
-        board_data = read_board(board)
-
-    converted = trello_to_ast(board_data)
+        pipeline.append(read_board)
+    
+    pipeline.append(trello_to_ast)
 
     if format == 'raw':
-        output = json.dumps(converted, indent=2)
+        pipeline.append(json.dumps)
     elif format == 'md':
-        output = ast_to_md(converted)
+        pipeline.append(ast_to_md)
     elif format == 'html':
-        output = toolz.pipe(converted, ast_to_md, md_to_html)
-
-    click.echo(output)
+        pipeline.extend([ast_to_md, md_to_html])
+    pipeline.append(click.echo)
+    toolz.pipe(board, *pipeline)
