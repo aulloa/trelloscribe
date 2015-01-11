@@ -1,4 +1,5 @@
 from functools import partial
+from itertools import chain
 import json
 
 import click
@@ -17,22 +18,15 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
               default='md')
 @click.argument('board')
 def cli(board_source, key, token, format, board):
-    pipeline = []
-    if board_source == 'id':
-        pipeline.append(partial(download_board, key, token))
-    elif board_source == 'name':
-        pipeline.extend([partial(search_boards, key, token),
-                        partial(download_board, key, token)])
-    elif board_source == 'file':
-        pipeline.append(read_board)
-    
-    pipeline.append(trello_to_ast)
-
-    if format == 'raw':
-        pipeline.append(json.dumps)
-    elif format == 'md':
-        pipeline.append(ast_to_md)
-    elif format == 'html':
-        pipeline.extend([ast_to_md, md_to_html])
-    pipeline.append(click.echo)
-    toolz.pipe(board, *pipeline)
+    read_phase = {
+        'id': [partial(download_board, key, token), trello_to_ast],
+        'name': [partial(search_boards, key, token), 
+                 partial(download_board, key, token),  trello_to_ast],
+        'file': [read_board,  trello_to_ast]
+    }
+    convert_phase = {
+        'raw': [json.dumps, click.echo],
+        'md': [ast_to_md, click.echo],
+        'html': [ast_to_md, md_to_html, click.echo]
+    }
+    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[format]))
