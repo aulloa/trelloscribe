@@ -3,7 +3,7 @@ import json
 import click
 import toolz
 
-from .trelloapi import download_board, find_board, read_board
+from .trelloapi import download_board, search_boards, read_board
 from .convert import trello_to_ast, ast_to_md, md_to_html
 
 
@@ -19,7 +19,8 @@ def cli(board_source, key, token, format, board):
     if board_source == 'id':
         board_data = download_board(key, token, board)
     elif board_source == 'name':
-        board_data = find_board(key, token, board)
+        board_data = toolz.thread_last(board, (search_boards, key, token),
+                                       (download_board, key, token))
     elif board_source == 'file':
         board_data = read_board(board)
 

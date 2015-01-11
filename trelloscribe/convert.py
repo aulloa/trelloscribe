@@ -1,5 +1,3 @@
-import operator
-
 import pypandoc
 import toolz
 

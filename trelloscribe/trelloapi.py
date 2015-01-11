@@ -23,13 +23,7 @@ def search_boards(key, token, board_name):
                                  toolz.first,
                                  (toolz.get, 'id'))
     except:
-        return sys.exit('No board found with that name')
-
-
-def find_board(key, token, board_name):
-    return toolz.thread_last(board_name,
-                             (search_boards, key, token),
-                             (download_board, key, token))
+        raise ValueError('No board found with that name')
 
 
 def execute_request(key, token, method, path, *args, **kwargs):
