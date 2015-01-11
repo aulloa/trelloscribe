@@ -14,10 +14,10 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
               type=click.Choice(['id', 'name', 'file']))
 @click.option('--key', help='Trello API Key', envvar='TRELLO_KEY')
 @click.option('--token', help='Trello API Token', envvar='TRELLO_TOKEN')
-@click.option('-t', '--format', type=click.Choice(['md', 'html', 'raw']),
-              default='md')
+@click.option('-t', '--to', type=click.Choice(['md', 'html', 'raw']),
+              default='md', help='Output format')
 @click.argument('board')
-def cli(board_source, key, token, format, board):
+def cli(board_source, key, token, to, board):
     read_phase = {
         'id': [download_board(key, token), trello_to_ast],
         'name': [search_boards(key, token), download_board(key, token),
@@ -29,4 +29,4 @@ def cli(board_source, key, token, format, board):
         'md': [ast_to_md, click.echo],
         'html': [ast_to_md, md_to_html, click.echo]
     }
-    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[format]))
+    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[to]))
