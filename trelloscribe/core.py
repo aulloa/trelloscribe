@@ -5,7 +5,7 @@ import os
 import toolz
 
 from .trelloapi import download_board, find_board, read_board
-from .convert import trello_to_ast, ast_to_md
+from .convert import trello_to_ast, ast_to_md, md_to_html
 
 
 def parse_args():
@@ -20,6 +20,8 @@ def parse_args():
                         default=os.getenv('trello_key'), help='Trello API Key')
     parser.add_argument('--trello-token', action='store',
                         default=os.getenv('trello_token'), help='Trello API Token')
+    parser.add_argument('--html', action='store_true', dest='html', default=False, 
+                        help='Export to HTML')
     return parser.parse_args()
 
 def main():
@@ -31,4 +33,10 @@ def main():
     elif args.read:
         board_data = read_board(args.read)
 
-    toolz.pipe(board_data, trello_to_ast, ast_to_md, print)
+    output = toolz.pipe(board_data, trello_to_ast, ast_to_md)
+    if args.html:
+        print(md_to_html(output))
+    else:
+        print(output)
+
+    

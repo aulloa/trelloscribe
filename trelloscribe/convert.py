@@ -39,3 +39,6 @@ def astlist_to_md(list_):
 def ast_to_md(board):
     markdowned = '\n\n'.join(map(astlist_to_md, board['lists']))
     return '# {0}\n\n{1}'.format(board['name'], markdowned)
+
+def md_to_html(md):
+    return pypandoc.convert(md, 'html', format='markdown')
