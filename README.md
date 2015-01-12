@@ -43,10 +43,10 @@ Not yet available
 
 ### With Github
 
-git clone https://github.com/mcktrtl/trelloscribe.git
+    git clone https://github.com/mcktrtl/trelloscribe.git
     pip install ./trelloscribe/
 
-You can also use `python ./trelloscribe/setup.py`
+You can also use `python ./trelloscribe/setup.py`.
 
 ### Pandoc
 
@@ -63,7 +63,7 @@ pandoc, enabling you to export to a myraid of document formats.
 
 ### Example
 
-trelloscribe -b name -t md TrelloScribe
+    trelloscribe -b name -t md TrelloScribe
 
 This will search all boards belonging to the owner of the API key for a
 board called "TrelloScribe", and convert it to Markdown.
@@ -81,17 +81,22 @@ View the CLI help by typing:
 
     Usage: trelloscribe-script.py [OPTIONS] BOARD
 
+      Hi, I'm TrelloScribe. I take Trello boards and turn them into documents!
+
     Options:
       -b, --board-source [id|name|file]
                                       Choosing name will search
       --key TEXT                      Trello API Key
       --token TEXT                    Trello API Token
       -t, --to [md|html|raw]          Output format
+      -o, --output FILENAME           Output file name
       --help                          Show this message and exit.
 
 ### Parameters
 
-#### -b/--board-source
+#### Options
+
+##### -b/--board-source
 
 Board source is an option telling TrelloScribe how to treat the board
 argument.
@@ -103,7 +108,7 @@ argument.
     doesn't find one, it will exit.
 -   `file` refers to a path to a JSON export of a Trello board.
 
-#### --key & --token
+##### --key & --token
 
 These are Trello API credentials. TrelloScribe will also pull from
 environmental variables `TRELLO_KEY` and `TRELLO_TOKEN`, respectively.
@@ -113,7 +118,7 @@ easily enough obtain your own API credentials from Trello directly:
 
 https://trello.com/1/appKey/generate
 
-#### -t / --to
+##### -t / --to
 
 -   `md` will output your document in a single Markdown file. If nothing
     is specified, this is the default.
@@ -122,7 +127,15 @@ https://trello.com/1/appKey/generate
 -   `raw` will output your document in JSON, in a simple schema native
     to TrelloScribe. It is **not** the same as Trello's exported JSON.
 
-#### board
+##### -o / --output
+
+Specify the file you want TrelloScribe to create with your converted
+document. If you do not set one, it will output directly to the
+terminal.
+
+#### Arguments
+
+##### Board
 
 Depending on the flag used for `--board-source`, this will either be the
 board ID/shortlink, the name of the board, or the path to the exported
