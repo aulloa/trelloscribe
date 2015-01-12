@@ -19,16 +19,18 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
 @click.option('-o', '--output', help='Output file name', type=click.File(mode='wb', lazy=True))
 @click.argument('board')
 def cli(board_source, key, token, to, output, board):
+    """Hi, I'm TrelloScribe. I take Trello boards and turn them into documents!"""
+    # Compose a sequence of functions based on the options chosen
+    # Note toolz.compose() works right to left
     read_phase = {
-        'id': [download_board(key, token), trello_to_ast],
-        'name': [search_boards(key, token), download_board(key, token),
-                 trello_to_ast],
-        'file': [read_board,  trello_to_ast]
+        'id': download_board(key, token),
+        'name': toolz.compose(download_board(key, token), search_boards(key, token)),
+        'file': read_board
     }
     convert_phase = {
-        'raw': [json.dumps],
-        'md': [ast_to_md],
-        'html': [ast_to_md, md_to_html]
+        'raw': partial(json.dumps, indent=2),
+        'md': ast_to_md,
+        'html': toolz.compose(md_to_html, ast_to_md)
     }
-    write_phase = lambda o: [lambda x: click.echo(x, file=o)]
-    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[to], write_phase(output)))
+    toolz.pipe(board, read_phase[board_source], trello_to_ast,
+               convert_phase[to], partial(click.echo, file=output))
