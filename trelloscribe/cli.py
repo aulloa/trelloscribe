@@ -16,8 +16,9 @@ from .convert import trello_to_ast, ast_to_md, md_to_html
 @click.option('--token', help='Trello API Token', envvar='TRELLO_TOKEN')
 @click.option('-t', '--to', type=click.Choice(['md', 'html', 'raw']),
               default='md', help='Output format')
+@click.option('-o', '--output', help='Output file name', type=click.File(mode='wb', lazy=True))
 @click.argument('board')
-def cli(board_source, key, token, to, board):
+def cli(board_source, key, token, to, output, board):
     read_phase = {
         'id': [download_board(key, token), trello_to_ast],
         'name': [search_boards(key, token), download_board(key, token),
@@ -25,8 +26,9 @@ def cli(board_source, key, token, to, board):
         'file': [read_board,  trello_to_ast]
     }
     convert_phase = {
-        'raw': [json.dumps, click.echo],
-        'md': [ast_to_md, click.echo],
-        'html': [ast_to_md, md_to_html, click.echo]
+        'raw': [json.dumps],
+        'md': [ast_to_md],
+        'html': [ast_to_md, md_to_html]
     }
-    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[to]))
+    write_phase = lambda o: [lambda x: click.echo(x, file=o)]
+    toolz.pipe(board, *chain(read_phase[board_source], convert_phase[to], write_phase(output)))
