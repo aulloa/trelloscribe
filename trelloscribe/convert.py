@@ -28,7 +28,7 @@ def astcard_to_md(card):
     else:
         fstring = '### {0}{1}'
         contents = ''
-    return fstring.format(card['name'], contents.strip())
+    return fstring.format(card['name'], contents.rstrip())
 
 def astlist_to_md(list_):
     concated_cards = '\n\n'.join(map(astcard_to_md, list_['cards']))
